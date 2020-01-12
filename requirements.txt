@@ -1,0 +1,5 @@
+Flask-RESTful
+python-dotenv
+Flask-JWT-Extended
+Flask-SQLAlchemy
+pymysql
