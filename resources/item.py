@@ -7,18 +7,26 @@ from flask_jwt_extended import (
     fresh_jwt_required,
     get_jwt_identity)
 
+BLANK_ERROR = '{} can not be blank'
+ITEM_NOT_FOUND = 'An item with name {} does not exist'
+ITEM_ALREADY_EXISTS = 'An item with name {} already exists'
+ERROR_INSERTING = 'An error occured while saving an item'
+MUST_BE_ADMIN = 'Admin privillages required'
+ITEM_DELETED = 'Item deleted'
+MUST_LOGIN = 'More data available if you login'
+
 
 class Item(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('price',
                         type=float,
                         required=True,
-                        help='Price is required!!'
+                        help=BLANK_ERROR.format('price')
                         )
     parser.add_argument('store_id',
                         type=int,
                         required=True,
-                        help='Store ID is required!!'
+                        help=BLANK_ERROR.format('store_id')
                         )
 
     @jwt_required
@@ -26,12 +34,12 @@ class Item(Resource):
         item = ItemModel.find_by_name(name)
         if item:
             return item.json(), 200
-        return {'message': f'An item with name {name} does not exist'}, 404
+        return {'message': ITEM_NOT_FOUND.format(name)}, 404
 
     @fresh_jwt_required
     def post(self, name: str):
         if ItemModel.find_by_name(name):
-            return {'message': f'An item with name {name} exists already'}, 400
+            return {'message': ITEM_ALREADY_EXISTS.format(name)}, 400
 
         data = Item.parser.parse_args()
 
@@ -40,7 +48,7 @@ class Item(Resource):
         try:
             item.save_to_db()
         except:
-            return {'message': 'An error occured while inserting an item.'}, 500
+            return {'message': ERROR_INSERTING}, 500
 
         return item.json(), 201
 
@@ -50,13 +58,13 @@ class Item(Resource):
         claims = get_jwt_claims()
 
         if not claims['is_admin']:
-            return {'message': 'Admin privillages required'}, 401
+            return {'message': MUST_BE_ADMIN}, 401
 
         item = ItemModel.find_by_name(name)
         if item:
             item.delete_from_db()
-            return {'message': 'Item deleted'}
-        return {'message': 'Item not found'}
+            return {'message': ITEM_DELETED}
+        return {'message': ITEM_NOT_FOUND.format(name)}
 
     @jwt_required
     def put(self, name: str):
@@ -82,4 +90,4 @@ class ItemList(Resource):
         if user_id:
             return {'items': items}, 200
         return {'items': [item['name'] for item in items],
-                'message': 'More data available if you login'}, 200
+                'message': MUST_LOGIN}, 200
