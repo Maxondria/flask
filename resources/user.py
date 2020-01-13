@@ -3,7 +3,6 @@ from flask_restful import Resource
 from models.user import UserModel
 from blacklist import BLACKLIST
 from schemas.user import UserSchema
-from marshmallow import ValidationError
 from flask_jwt_extended import (create_access_token,
                                 create_refresh_token,
                                 jwt_required,
@@ -25,10 +24,7 @@ user_schema = UserSchema()
 
 class UserRegister(Resource):
     def post(self):
-        try:
-            user = user_schema.load(request.get_json())
-        except ValidationError as error:
-            return error.messages, 400
+        user = user_schema.load(request.get_json())
 
         if UserModel.find_by_username(user.username):
             return {'message': USER_EXISTS_ALREADY.format(user.username)}, 400
@@ -60,10 +56,7 @@ class User(Resource):
 class UserLogin(Resource):
     @classmethod
     def post(cls):
-        try:
-            user_data = user_schema.load(request.get_json())
-        except ValidationError as error:
-            return error.messages, 400
+        user_data = user_schema.load(request.get_json())
 
         user = UserModel.find_by_username(user_data.username)
 

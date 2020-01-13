@@ -8,6 +8,6 @@ class StoreSchema(ma.ModelSchema):
     items = ma.Nested(ItemSchema, many=True)
 
     class Meta:
-        model = StoreSchema
+        model = StoreModel
         dump_only = ('id',)
         include_fk = True

@@ -10,6 +10,7 @@ from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogo
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 
+from marshmallow import ValidationError
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = environ['JWT_SECRET']
@@ -30,6 +31,11 @@ api = Api(app)
 @app.before_first_request
 def create_tables():
     db.create_all()
+
+
+@app.errorhandler(ValidationError)
+def handle_marshmallow_validation(error):
+    return jsonify(error.messages), 400
 
 
 jwt = JWTManager(app)
