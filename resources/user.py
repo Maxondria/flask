@@ -26,17 +26,16 @@ user_schema = UserSchema()
 class UserRegister(Resource):
     def post(self):
         try:
-            user_data = user_schema.load(request.get_json())
+            user = user_schema.load(request.get_json())
         except ValidationError as error:
             return error.messages, 400
 
-        if UserModel.find_by_username(user_data['username']):
-            return {'message': USER_EXISTS_ALREADY.format(user_data['username'])}, 400
+        if UserModel.find_by_username(user.username):
+            return {'message': USER_EXISTS_ALREADY.format(user.username)}, 400
 
-        user = UserModel(**user_data)
         user.save_to_db()
 
-        return {'message': USER_CREATED_SUCCESSFULLY.format(user_data['username'])}, 201
+        return {'message': USER_CREATED_SUCCESSFULLY.format(user.username)}, 201
 
 
 class User(Resource):
@@ -66,9 +65,9 @@ class UserLogin(Resource):
         except ValidationError as error:
             return error.messages, 400
 
-        user = UserModel.find_by_username(user_data['username'])
+        user = UserModel.find_by_username(user_data.username)
 
-        if user and user.password == user_data['password']:
+        if user and user.password == user_data.password:
             access_token = create_access_token(identity=user.id, fresh=True)
             refresh_token = create_refresh_token(user.id)
             return {'access_token': access_token, 'refresh_token': refresh_token}, 200

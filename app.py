@@ -3,6 +3,7 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from os import environ
 from db import db
+from ma import ma
 from blacklist import BLACKLIST
 
 from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout
@@ -18,6 +19,7 @@ app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
 db.init_app(app)
+ma.init_app(app)
 
 
 api = Api(app)
