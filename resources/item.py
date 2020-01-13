@@ -1,5 +1,8 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
+from flask import request
 from models.item import ItemModel
+from schemas.item import ItemSchema
+from marshmallow import ValidationError
 from flask_jwt_extended import (
     jwt_required,
     jwt_optional,
@@ -7,7 +10,6 @@ from flask_jwt_extended import (
     fresh_jwt_required,
     get_jwt_identity)
 
-BLANK_ERROR = '{} can not be blank'
 ITEM_NOT_FOUND = 'An item with name {} does not exist'
 ITEM_ALREADY_EXISTS = 'An item with name {} already exists'
 ERROR_INSERTING = 'An error occured while saving an item'
@@ -16,25 +18,17 @@ ITEM_DELETED = 'Item deleted'
 MUST_LOGIN = 'More data available if you login'
 
 
-class Item(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('price',
-                        type=float,
-                        required=True,
-                        help=BLANK_ERROR.format('price')
-                        )
-    parser.add_argument('store_id',
-                        type=int,
-                        required=True,
-                        help=BLANK_ERROR.format('store_id')
-                        )
+item_schema = ItemSchema()
+item_list_schema = ItemSchema(many=True)
 
+
+class Item(Resource):
     @classmethod
     @jwt_required
     def get(cls, name: str):
         item = ItemModel.find_by_name(name)
         if item:
-            return item.json(), 200
+            return item_schema.dump(item), 200
         return {'message': ITEM_NOT_FOUND.format(name)}, 404
 
     @classmethod
@@ -43,16 +37,20 @@ class Item(Resource):
         if ItemModel.find_by_name(name):
             return {'message': ITEM_ALREADY_EXISTS.format(name)}, 400
 
-        data = Item.parser.parse_args()
+        item_json = request.get_json()
+        item_json['name'] = name
 
-        item = ItemModel(name, **data)
+        try:
+            item = item_schema.load(item_json)
+        except ValidationError as error:
+            return error.messages, 400
 
         try:
             item.save_to_db()
         except Exception as e:
             return {'message': ERROR_INSERTING}, 500
 
-        return item.json(), 201
+        return item_schema.dump(item), 201
 
     @classmethod
     @jwt_required
@@ -72,17 +70,20 @@ class Item(Resource):
     @classmethod
     @jwt_required
     def put(cls, name: str):
-        data = Item.parser.parse_args()
-
+        item_json = request.get_json()
         item = ItemModel.find_by_name(name)
 
         if item is None:
-            item = ItemModel(name, **data)
+            item_json['name'] = name
+            try:
+                item = item_schema.load(item_json)
+            except ValidationError as error:
+                return error.messages, 400
         else:
-            item.price = data['price']
-            item.store_id = data['store_id']
+            item.price = item_json['price']
+            item.store_id = item_json['store_id']
         item.save_to_db()
-        return item.json(), 200
+        return item_schema.dump(item), 200
 
 
 class ItemList(Resource):
@@ -90,7 +91,7 @@ class ItemList(Resource):
     @jwt_optional
     def get(cls):
         user_id = get_jwt_identity()
-        items = [item.json() for item in ItemModel.find_all()]
+        items = item_list_schema.dump(ItemModel.find_all())
 
         if user_id:
             return {'items': items}, 200
