@@ -1,5 +1,6 @@
 import traceback
 from blacklist import BLACKLIST
+from libs.mailgun import MailGunException
 from flask import make_response, render_template, request
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt,
@@ -38,10 +39,12 @@ class UserRegister(Resource):
             user.save_to_db()
             user.send_confirmation_email()
             return {'message': USER_CREATED_SUCCESSFULLY.format(user.email)}, 201
+        except MailGunException as error:
+            user.delete_from_db()
+            return {'message': str(error)}, 500
         except:
             traceback.print_exc(), 500
             return {'message': FAILED_TO_CREATE}, 500
-        
 
 
 class User(Resource):
