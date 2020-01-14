@@ -1,24 +1,24 @@
-from flask import request, make_response, render_template
+import traceback
+from blacklist import BLACKLIST
+from flask import make_response, render_template, request
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                get_jwt_identity, get_raw_jwt,
+                                jwt_refresh_token_required, jwt_required)
 from flask_restful import Resource
 from models.user import UserModel
-from blacklist import BLACKLIST
 from schemas.user import UserSchema
-from flask_jwt_extended import (create_access_token,
-                                create_refresh_token,
-                                jwt_required,
-                                get_jwt_identity,
-                                get_raw_jwt,
-                                jwt_refresh_token_required)
 
 BLANK_ERROR = '{} can not be blank'
+EMAIL_EXISTS_ALREADY = 'User with email <{}> exists already'
 USER_EXISTS_ALREADY = '{} exists already'
-USER_CREATED_SUCCESSFULLY = 'User {} created successfully'
+USER_CREATED_SUCCESSFULLY = 'An email was sent to <{}>. Please confirm your account'
 USER_NOT_FOUND = 'User not found'
 USER_DELETED_SUCCESSFULLY = 'User deleted successfully'
 INVALID_CREDENTIALS = 'Invalid credentials provided'
 USER_LOGGED_OUT = 'Successfully logged out'
 NOT_CONFIRMED_ERROR = 'Your email <{}> is not confirmed. Please check your email'
 USER_ACCOUNT_CONFIRMED = 'Congrats <{}>, your account has been confirmed'
+FAILED_TO_CREATE = 'User couldnot be registered.'
 
 
 user_schema = UserSchema()
@@ -31,9 +31,17 @@ class UserRegister(Resource):
         if UserModel.find_by_username(user.username):
             return {'message': USER_EXISTS_ALREADY.format(user.username)}, 400
 
-        user.save_to_db()
+        if UserModel.find_by_email(user.email):
+            return {'message': EMAIL_EXISTS_ALREADY.format(user.email)}, 400
 
-        return {'message': USER_CREATED_SUCCESSFULLY.format(user.username)}, 201
+        try:
+            user.save_to_db()
+            user.send_confirmation_email()
+            return {'message': USER_CREATED_SUCCESSFULLY.format(user.email)}, 201
+        except:
+            traceback.print_exc(), 500
+            return {'message': FAILED_TO_CREATE}, 500
+        
 
 
 class User(Resource):
@@ -58,7 +66,7 @@ class User(Resource):
 class UserLogin(Resource):
     @classmethod
     def post(cls):
-        user_data = user_schema.load(request.get_json())
+        user_data = user_schema.load(request.get_json(), partial=('email',))
 
         user = UserModel.find_by_username(user_data.username)
 
@@ -98,4 +106,4 @@ class UserConfirm(Resource):
         user.activated = True
         user.save_to_db()
         headers = {"content-Type": "text/html"}
-        return make_response(render_template("confirmation_page.html", email=user.username), 200, headers)
+        return make_response(render_template("confirmation_page.html", email=user.email), 200, headers)

@@ -12,6 +12,9 @@ services:
       - mysql
     environment:
       JWT_SECRET: ${JWT_SECRET:-some_secret_jwt_key}
+      MAILGUN_API_KEY: ${MAILGUN_API_KEY:-24f9827cfab86e48378a34005bbe77b5-0a4b0c40-84a52e67}
+      MAILGUN_DOMAIN_NAME: ${MAILGUN_DOMAIN_NAME:-sandbox12ed65ba639d4a90946505a01da9570c.mailgun.org}
+      JWT_SECRET: ${JWT_SECRET:-some_secret_jwt_key}
       MYSQL_HOST: ${MYSQL_HOST:-localhost}
       MYSQL_USER: ${MYSQL_USER:-root}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-root}

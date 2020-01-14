@@ -6,3 +6,4 @@ pymysql
 flask-marshmallow
 marshmallow-sqlalchemy
 marshmallow
+requests
