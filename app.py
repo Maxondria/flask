@@ -1,21 +1,28 @@
-from flask import Flask, jsonify
-from flask_restful import Api
-from flask_jwt_extended import JWTManager
 from os import environ
-from db import db
-from ma import ma
-from blacklist import BLACKLIST
 
-from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout, UserConfirm
+from blacklist import BLACKLIST
+from db import db
+from flask import Flask, jsonify
+from flask_jwt_extended import JWTManager
+from flask_restful import Api
+from ma import ma
+from marshmallow import ValidationError
+from resources.confirmation import Confirmation, ConfirmationByUser
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
-
-from marshmallow import ValidationError
+from resources.user import (TokenRefresh, User, UserLogin, UserLogout,
+                            UserRegister)
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = environ['JWT_SECRET']
+
+db_user = environ['MYSQL_USER']
+db_pass = environ['MYSQL_PASSWORD']
+db_host = environ['MYSQL_HOST']
+db_name = environ['MYSQL_DB']
+
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@mysql/advanced_flask_restful'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['JWT_BLACKLIST_ENABLED'] = True
@@ -103,7 +110,8 @@ api.add_resource(User, '/user/<int:user_id>')
 api.add_resource(UserLogin, '/login')
 api.add_resource(TokenRefresh, '/refresh')
 api.add_resource(UserLogout, '/logout')
-api.add_resource(UserConfirm, '/confirm/<int:user_id>')
+api.add_resource(Confirmation, '/user_confirmation/<string:confirmation_id>')
+api.add_resource(ConfirmationByUser, '/confirmation/user/<int:user_id>')
 
 
 if __name__ == '__main__':
