@@ -1,8 +1,9 @@
-from time import time
 import traceback
+from time import time
+
 from flask import make_response, render_template
 from flask_restful import Resource
-from libs.mailgun import MailGunException
+from libs.mailgun import MailGunException~
 from models.confirmation import ConfirmationModel
 from models.user import UserModel
 from schemas.confirmation import ConfirmationSchema
