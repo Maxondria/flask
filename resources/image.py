@@ -16,6 +16,7 @@ IMAGE_ILLEGAL_FILENAME = 'The filename <{}> of the file is not valid.'
 IMAGE_NOT_FOUND = 'Image <{}> was not found.'
 IMAGE_DELETE_FAILED = 'Deleting image failed.'
 IMAGE_DELETED_SUCCESS = 'Deleted image <{}> successfully.'
+AVATAR_NOT_FOUND = 'Avatar not found.'
 
 
 class ImageUpload(Resource):
@@ -112,3 +113,17 @@ class AvatarUpload(Resource):
         except UploadNotAllowed:  # forbidden file type
             extension = image_helper.get_extension(data["image"])
             return {"message": IMAGE_ILLEGAL_EXTENSION.format(filename)}, 400
+
+
+class Avatar(Resource):
+    @classmethod
+    def get(cls, user_id: int):
+        """
+        This endpoint returns the avatar of the user specified by user_id.
+        """
+        folder = "avatars"
+        filename = f"user_{user_id}"
+        avatar = image_helper.find_image_any_format(filename, folder)
+        if avatar:
+            return send_file(avatar)
+        return {"message": AVATAR_NOT_FOUND}, 404
