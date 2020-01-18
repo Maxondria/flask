@@ -14,7 +14,7 @@ def save_image(image: FileStorage, folder: str = None, name: str = None) -> str:
     return IMAGE_SET.save(image, folder, name)
 
 
-def get_path(filaname: str = None, folder: str = None) -> str:
+def get_path(filename: str = None, folder: str = None) -> str:
     """Take image and return full path"""
     return IMAGE_SET.path(filename, folder)
 
