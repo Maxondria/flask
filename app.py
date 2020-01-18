@@ -3,9 +3,12 @@ from db import db
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
+from flask_uploads import configure_uploads, patch_request_class
+from libs.image_helper import IMAGE_SET
 from ma import ma
 from marshmallow import ValidationError
 from resources.confirmation import Confirmation, ConfirmationByUser
+from resources.image import ImageUpload
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 from resources.user import (TokenRefresh, User, UserLogin, UserLogout,
@@ -15,6 +18,9 @@ app = Flask(__name__)
 
 app.config.from_object('default_config')
 app.config.from_envvar('APPLICATION_SETTINGS')
+
+patch_request_class(app, 10 * 1024 * 1024)  # 10MB max upload size
+configure_uploads(app, IMAGE_SET)
 
 db.init_app(app)
 ma.init_app(app)
@@ -99,6 +105,7 @@ api.add_resource(TokenRefresh, '/refresh')
 api.add_resource(UserLogout, '/logout')
 api.add_resource(Confirmation, '/user_confirmation/<string:confirmation_id>')
 api.add_resource(ConfirmationByUser, '/confirmation/user/<int:user_id>')
+api.add_resource(ImageUpload, '/upload/image')
 
 
 if __name__ == '__main__':
