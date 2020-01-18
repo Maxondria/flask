@@ -8,7 +8,7 @@ from libs.image_helper import IMAGE_SET
 from ma import ma
 from marshmallow import ValidationError
 from resources.confirmation import Confirmation, ConfirmationByUser
-from resources.image import ImageUpload, Image
+from resources.image import ImageUpload, Image, AvatarUpload
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 from resources.user import (TokenRefresh, User, UserLogin, UserLogout,
@@ -107,7 +107,7 @@ api.add_resource(Confirmation, '/user_confirmation/<string:confirmation_id>')
 api.add_resource(ConfirmationByUser, '/confirmation/user/<int:user_id>')
 api.add_resource(ImageUpload, '/upload/image')
 api.add_resource(Image, '/image/<string:filename>')
-
+api.add_resource(AvatarUpload, "/upload/avatar")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
