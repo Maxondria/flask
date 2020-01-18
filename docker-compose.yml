@@ -18,6 +18,7 @@ services:
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      APPLICATION_SETTINGS: ${APPLICATION_SETTINGS}
       MYSQL_DB: ${MYSQL_DB}
 
   flask_log_monitor:
