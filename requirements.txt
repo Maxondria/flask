@@ -8,3 +8,4 @@ marshmallow-sqlalchemy
 marshmallow
 requests
 flask-uploads
+flask-migrate

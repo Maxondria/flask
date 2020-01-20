@@ -2,13 +2,14 @@ from blacklist import BLACKLIST
 from db import db
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 from flask_restful import Api
 from flask_uploads import configure_uploads, patch_request_class
 from libs.image_helper import IMAGE_SET
 from ma import ma
 from marshmallow import ValidationError
 from resources.confirmation import Confirmation, ConfirmationByUser
-from resources.image import ImageUpload, Image, AvatarUpload, Avatar
+from resources.image import Avatar, AvatarUpload, Image, ImageUpload
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 from resources.user import (TokenRefresh, User, UserLogin, UserLogout,
@@ -39,6 +40,7 @@ def handle_marshmallow_validation(error):
 
 
 jwt = JWTManager(app)
+migrate = Migrate(app, db)
 
 
 # add more data to the token other than simply identity
