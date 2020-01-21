@@ -8,12 +8,14 @@ from flask_uploads import configure_uploads, patch_request_class
 from libs.image_helper import IMAGE_SET
 from ma import ma
 from marshmallow import ValidationError
+from oa import oauth
 from resources.confirmation import Confirmation, ConfirmationByUser
+from resources.github_login import GithubAuthorize, GithubLogin
 from resources.image import Avatar, AvatarUpload, Image, ImageUpload
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
-from resources.user import (TokenRefresh, User, UserLogin, UserLogout,
-                            UserRegister)
+from resources.user import (SetOAuthUserPassword, TokenRefresh, User,
+                            UserLogin, UserLogout, UserRegister)
 
 app = Flask(__name__)
 
@@ -25,6 +27,7 @@ configure_uploads(app, IMAGE_SET)
 
 db.init_app(app)
 ma.init_app(app)
+oauth.init_app(app)
 
 api = Api(app)
 
@@ -111,6 +114,10 @@ api.add_resource(ImageUpload, '/upload/image')
 api.add_resource(Image, '/image/<string:filename>')
 api.add_resource(AvatarUpload, "/upload/avatar")
 api.add_resource(Avatar, "/avatar/<int:user_id>")
+api.add_resource(GithubLogin, "/login/github")
+api.add_resource(GithubAuthorize, "/login/github/authorized",
+                 endpoint='github.authorize')
+api.add_resource(SetOAuthUserPassword, "/user/auth/password")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

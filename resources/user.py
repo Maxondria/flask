@@ -4,7 +4,7 @@ from blacklist import BLACKLIST
 from flask import request
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt,
-                                jwt_refresh_token_required, jwt_required)
+                                jwt_refresh_token_required, jwt_required, fresh_jwt_required)
 from flask_restful import Resource
 from libs.mailgun import MailGunException
 from models.confirmation import ConfirmationModel
@@ -22,6 +22,7 @@ USER_LOGGED_OUT = 'Successfully logged out'
 NOT_CONFIRMED_ERROR = 'Your email <{}> is not confirmed. Please check your email'
 USER_ACCOUNT_CONFIRMED = 'Congrats <{}>, your account has been confirmed'
 FAILED_TO_CREATE = 'User couldnot be registered.'
+USER_PASSWORD_UPDATED_SUCCESSFULLY = 'User password updated successfully'
 
 
 user_schema = UserSchema()
@@ -105,3 +106,19 @@ class TokenRefresh(Resource):
         current_user = get_jwt_identity()
         new_token = create_access_token(identity=current_user, fresh=False)
         return {'access_token': new_token}, 200
+
+
+class SetOAuthUserPassword(Resource):
+    @classmethod
+    @fresh_jwt_required
+    def post(cls):
+        user_json = request.get_json()
+        user_data = user_schema.load(user_json)
+        verified_email = UserModel.find_by_email(user_data.email)
+        verified_username = UserModel.find_by_username(user_data.username)
+
+        if not verified_email or not verified_username:
+            return {'message': USER_NOT_FOUND}
+        verified_email.password = user_data.password
+        verified_email.save_to_db()
+        return {'message': USER_PASSWORD_UPDATED_SUCCESSFULLY}, 201

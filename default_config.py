@@ -8,3 +8,4 @@ JWT_SECRET_KEY = environ['JWT_SECRET']
 JWT_BLACKLIST_ENABLED = True
 JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
 UPLOADED_IMAGES_DEST = path.join('static', 'images')
+SECRET_KEY = environ['APP_SECRET_KEY']

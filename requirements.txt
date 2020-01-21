@@ -9,3 +9,4 @@ marshmallow
 requests
 flask-uploads
 flask-migrate
+Flask-OAuthlib

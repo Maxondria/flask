@@ -20,6 +20,9 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       APPLICATION_SETTINGS: ${APPLICATION_SETTINGS}
       MYSQL_DB: ${MYSQL_DB}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
 
   flask_log_monitor:
     container_name: flask_log_monitor
