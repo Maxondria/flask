@@ -1,6 +1,6 @@
 from os import environ
 
-from flask import g, request, url_for
+from flask import g, request
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_restful import Resource
 from models.user import UserModel
@@ -8,8 +8,7 @@ from oa import github
 
 
 class GithubLogin(Resource):
-    # 'http://localhost:5000/login/github/authorized'
-    github_callback_url = url_for('github.authorize', _external=True)
+    github_callback_url = 'http://localhost:5000/login/github/authorized'
 
     @classmethod
     def get(cls):

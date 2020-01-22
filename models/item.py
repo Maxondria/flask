@@ -1,4 +1,5 @@
-from typing import  List
+from typing import List
+
 from db import db
 
 
@@ -23,6 +24,10 @@ class ItemModel(db.Model):
     @classmethod
     def find_by_name(cls, name: str) -> 'ItemModel':
         return cls.query.filter_by(name=name).first()
+
+    @classmethod
+    def find_by_id(cls, _id: int) -> 'ItemModel':
+        return cls.query.filter_by(id=_id).first()
 
     @classmethod
     def find_all(cls) -> List['ItemModel']:
