@@ -35,7 +35,7 @@ class OrderModel(db.Model):
         self.status = status
         self.save_to_db()
 
-   @property
+    @property
     def description(self) -> str:
         """
         Generates a simple string representing this order, in the format of "5x chair, 2x table"
